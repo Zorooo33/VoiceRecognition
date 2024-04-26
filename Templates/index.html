@@ -1,0 +1,170 @@
+<!-- templates/index.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speech Recognition</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background: linear-gradient(135deg, #ff8a00, #e52e71);
+            margin: 0;
+            padding: 0;
+            color: #333;
+        }
+        #container {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        h1 {
+            margin-top: 50px;
+            margin-bottom: 20px;
+            font-size: 48px; /* Increased font size */
+            font-weight: bold;
+            color: red;
+            font-family: 'Times New Roman', Times, serif; /* Changed font */
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Added text shadow */
+        }
+        h2 {
+            font-size: 36px; /* Increased font size */
+            margin-bottom: 10px;
+            color: #fff; /* Changed text color to white */
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); /* Added text shadow */
+        }
+        #language-options {
+            margin-bottom: 20px;
+        }
+        #speech-form {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        #loading {
+            display: none;
+            margin-top: 20px;
+        }
+        .loading-spinner {
+            border: 8px solid #f3f3f3;
+            border-top: 8px solid #3498db;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .error {
+            color: #d63031;
+            font-weight: bold;
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        select {
+            padding: 8px;
+            font-size: 16px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div id="container">
+        <h1>RAJA NARAYANLAL LAHOTI ENGLISH SCHOOL EXPO 2024</h1>
+        <h2>Speech Recognition</h2>
+        <div id="language-options">
+            <label for="language">Select Language:</label>
+            <select id="language">
+                <option value="en-US">English (US)</option>
+                <option value="en-GB">English (UK)</option>
+                <option value="es-ES">Spanish</option>
+                <option value="hi-IN">Hindi</option>
+                <option value="mr-IN">Marathi</option>
+            </select>
+        </div>
+        <button id="start-recognition">Start Recording</button>
+        <button id="stop-recognition" disabled>Stop Recording</button>
+        <div id="loading">
+            <div class="loading-spinner"></div>
+            <p>Recognizing...</p>
+        </div>
+        <div id="result"></div>
+    </div>
+    <script>
+        const startButton = document.getElementById('start-recognition');
+        const stopButton = document.getElementById('stop-recognition');
+        const resultDiv = document.getElementById('result');
+        const loadingDiv = document.getElementById('loading');
+        const languageSelect = document.getElementById('language');
+
+        let recognition;
+
+        startButton.addEventListener('click', function() {
+            startButton.disabled = true;
+            stopButton.disabled = false;
+            resultDiv.innerText = '';
+            loadingDiv.style.display = 'block';
+
+            recognition = new webkitSpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = languageSelect.value;
+
+            recognition.onresult = function(event) {
+                let interimTranscript = '';
+                let finalTranscript = '';
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        finalTranscript += event.results[i][0].transcript;
+                    } else {
+                        interimTranscript += event.results[i][0].transcript;
+                    }
+                }
+                resultDiv.innerHTML = '<p>Interim Result: ' + interimTranscript + '</p><p>Final Result: ' + finalTranscript + '</p>';
+            };
+
+            recognition.onend = function() {
+                startButton.disabled = false;
+                stopButton.disabled = true;
+                loadingDiv.style.display = 'none';
+            };
+
+            recognition.onerror = function(event) {
+                loadingDiv.style.display = 'none';
+                resultDiv.innerHTML = "<p class='error'>Error: " + event.error + "</p>";
+            };
+
+            recognition.start();
+        });
+
+        stopButton.addEventListener('click', function() {
+            startButton.disabled = false;
+            stopButton.disabled = true;
+            recognition.stop();
+        });
+    </script>
+</body>
+</html>
